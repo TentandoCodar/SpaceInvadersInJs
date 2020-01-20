@@ -26,6 +26,9 @@ window.onload = () => {
     let playerLife = 100;
     let enemyShotX = 0;
     let enemyShotY = 0;
+    let enemyShotOnFire = false;
+    let enemyData = {};
+    let enemyShotPos = 0;
     for(let y = 0; y < brickColumnCount; y++) {
         enemies[y] = []
         for(let x = 0; x < brickRowCount; x++) {
@@ -49,10 +52,11 @@ window.onload = () => {
         startEnemies();
         drawShot();
         drawPlayerLife();
+        renderEnemyShot();
     }
 
     function drawPlayer() {
-        ctx.fillStyle = "#333";
+        ctx.fillStyle = "green";
         ctx.fillRect(positionX, positionY, 60,20);
         if(positionX >= 540 && playerVelocity == 5) {
             positionX = 540;
@@ -70,7 +74,7 @@ window.onload = () => {
     function drawShot() {
         if(shotStatus) {
             ctx.fillStyle = "#333";
-            ctx.fillRect(shotX,shotY, 10,10);
+            ctx.fillRect(shotX,shotY, 5,20);
             shotY -= 5;
             
         }
@@ -181,9 +185,51 @@ window.onload = () => {
 
     function drawPlayerLife() {
         ctx.fillStyle = "black";
-        ctx.fillRect(0, 390, playerLife, 10);
+        ctx.font = "10px Arial black";
+        ctx.fillText("Vida Atual: ", 0, 395);
+        ctx.fillStyle = "black";
+        ctx.fillRect(70, 390, playerLife, 10);
+        
+    }
+    
+    function renderEnemyShot() {
+        if(!enemyShotOnFire) {
+            
+            const max1 = brickRowCount - 1;
+            const max2 = brickColumnCount - 1;
+            const randomColumnNumber = Math.round(Math.random() * (max1 - 0) + 0);
+            const randomRowNumber = Math.round(Math.random() * (max2 - 0) + 0);
+            if(enemies[randomRowNumber][randomColumnNumber].status == 1) {
+                enemyData = enemies[randomRowNumber][randomColumnNumber];
+                enemyShotPos = enemyData.y;
+            }
+            enemyShotOnFire = true;
+            
+        }
+        else {
+            enemyShotPos = enemyShotPos + 2.5;
+            ctx.fillStyle = "red";
+            ctx.fillRect(enemyData.x + 15, enemyShotPos, 5, 20);
+            checkPlayerShotColision();
+            checkShotLimit();
+        }
         
     }
 
+    function checkPlayerShotColision() {
+        if(enemyData.x >= positionX - 30 && enemyData.x <= positionX + 30 && enemyShotPos == positionY) {
+            enemyShotOnFire = false;
+            playerLife -= 25;
+        }
+    }
     
-}
+    function checkShotLimit() {
+        if(enemyShotPos >= 400) {
+            enemyShotOnFire = false;
+        }
+    }
+
+    
+
+      
+} 
